@@ -110,7 +110,7 @@ class ETR:
             try:
                 Util.write_error_log(getattr(params, 'linea'), getattr(params, 'parada'), text)
             except Exception, e:
-                print 'Error al intentar guardar error en el registro.'
+                print 'Error al intentar guardar en el registro.'
 
             return text
 
