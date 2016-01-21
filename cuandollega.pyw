@@ -10,7 +10,7 @@ from ui.ui import App
 
 
 ####################################
-## General configuration
+# General configuration
 
 arguments = 'hLaIl:p:i:e:'
 arguments_long = ['help', 'log', 'alert', 'interactivo', 'linea=', 'parada=', 'intervalo=', 'email=']
@@ -38,7 +38,7 @@ Uso:
 
 
 ####################################
-## Read general configuration
+# Read general configuration
 
 config = Util.load_config()
 interval = config['interval']
@@ -48,7 +48,7 @@ email = None
 
 
 ####################################
-## Main
+# Main
 
 def main(args):
     global description_text, usage_text, arguments, arguments_long, interval, log_dir, alert, email
@@ -92,7 +92,7 @@ def main(args):
             sys.exit()
 
         if log_results:
-            if custom_interval != None:
+            if custom_interval is not None:
                 interval = custom_interval
 
             print 'Guadando registro de consultas en el directorio \'' + log_dir + '\' - Intervalo: ' + str(interval) + ' segundos.\n'

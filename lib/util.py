@@ -107,9 +107,9 @@ class Util:
                 app.main.trayIcon.showMessage(line, response.decode('utf-8'))
                 sys.exit(app.exec_())
             except Exception:
-                os.system('kdialog --msgbox \'' + response + '\' 10 --title \'Cuándo llega - Línea ' + line + ' EN CAMINO\' &')
+                os.system('kdialog --passivepopup \'' + response + '\' 10 --title \'Cuándo llega - Línea ' + line + ' EN CAMINO\' &')
             '''
-            os.system('kdialog --msgbox \'' + response + '\' 10 --title \'Cuándo llega - Línea ' + line + ' EN CAMINO\' &')
+            os.system('kdialog --passivepopup \'' + response + '\' 10 --title \'Cuándo llega - Línea ' + line + ' EN CAMINO\' &')
 
         if email:
             Util.send_email(email, '¿Cuándo llega? - Línea ' + line + ' EN CAMINO', response)

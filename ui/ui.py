@@ -36,7 +36,7 @@ class MainWindow(QtGui.QMainWindow):
         self.trayIcon.show()
         self.trayIcon.setContextMenu(self.ui.menuInicio)
 
-        self.ui.comboBox_linea.addItem('')
+        self.ui.comboBox_linea.addItem('', '')
         self.ui.comboBox_linea.addItems(ETR.list_lines()[1])
 
         self.connect(self.ui.comboBox_linea, QtCore.SIGNAL("currentIndexChanged(QString)"), self.on_line_change)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#! /usr/bin/python
 # -*- coding: utf-8 -*-
 
 import urllib
@@ -18,48 +18,51 @@ class ETR:
     timeout = config['timeout']
 
     lines_ids = {
-        '101': '1,2',
-        '102': '3,4',
-        '103': '5,6',
-        '106': '7, 8',    # 106 Negro / Rojo
-        '107': '9, 10',    # 107 Negro - Distrito Sur / 107 Rojo - Necochea
-        '110': '11',
-        '112': '12,13',
-        '113': '14',
-        '115': '15',
-        '116': '16',
-        '120': '17',
-        '121': '18',
-        '122': '19,20',
-        '123': '21',
-        '125': '22',
-        '126': '23,24',
-        '127': '25',
-        '128': '26,27',
-        '129': '28',
-        '130': '29',
-        '131': '30',
-        '132': '31',
-        '133': '32,33',
-        '134': '34',
-        '135': '35',
-        '136': '36',
-        '137': '37',
-        '138': '38,39',
-        '139': '40,41',
-        '140': '43',
-        '141': '44',
-        '142': '45,46,47',
-        '143': '48,49',
-        '144': '50,51',
-        '145': '52,53',
-        '146': '54,55',
-        '153': '56,57,58',
-        # '35-9': '59, 60, 61',    # 35/9 Negro / Rojo / Verde (no habilitados)
-        'ENO': '63',    # Enlace NorOeste
-        'K': '64',
-        'LC': '65',
-        'RC': '66'
+        '101': {'id': '1,2', 'code': None, 'label': None},
+        '102': {'id': '3,4', 'code': None, 'label': None},
+        '103': {'id': '5,6', 'code': None, 'label': None},
+        '106': {'id': '7,8', 'code': None, 'label': None},
+        '107': {'id': '9,10', 'code': None, 'label': None},
+        '110': {'id': '11', 'code': None, 'label': None},
+        '112': {'id': '12,13', 'code': None, 'label': None},
+        '113': {'id': '14', 'code': None, 'label': None},
+        '115': {'id': '15', 'code': None, 'label': None},
+        '116': {'id': '16', 'code': None, 'label': None},
+        '120': {'id': '17', 'code': None, 'label': None},
+        '121': {'id': '18', 'code': None, 'label': None},
+        '122': {'id': '19,20', 'code': None, 'label': None},
+        '123': {'id': '21', 'code': None, 'label': None},
+        '125': {'id': '22', 'code': None, 'label': None},
+        '126': {'id': '23,24', 'code': None, 'label': None},
+        '127': {'id': '25', 'code': None, 'label': None},
+        '128': {'id': '26,27', 'code': None, 'label': None},
+        '129': {'id': '28', 'code': None, 'label': None},
+        '130': {'id': '29', 'code': None, 'label': None},
+        '131': {'id': '30', 'code': None, 'label': None},
+        '132': {'id': '31', 'code': None, 'label': None},
+        '133': {'id': '32,33', 'code': None, 'label': None},
+        '134': {'id': '34', 'code': None, 'label': None},
+        '135': {'id': '35', 'code': None, 'label': None},
+        '136': {'id': '36', 'code': None, 'label': None},
+        '137': {'id': '37', 'code': None, 'label': None},
+        '138': {'id': '38,39', 'code': None, 'label': None},
+        '139': {'id': '40,41', 'code': None, 'label': None},
+        '140': {'id': '43', 'code': None, 'label': None},
+        '141': {'id': '44', 'code': None, 'label': None},
+        '142': {'id': '45,46,47', 'code': None, 'label': None},
+        '143': {'id': '48,49', 'code': None, 'label': None},
+        '144': {'id': '50,51', 'code': None, 'label': None},
+        '145': {'id': '52,53', 'code': None, 'label': None},
+        '146': {'id': '54,55', 'code': None, 'label': None},
+        '153': {'id': '56,57,58', 'code': None, 'label': None},
+        '35-9': {'id': '59,60,61', 'code': None, 'label': '35/9'},
+        'ENO': {'id': '63', 'code': None, 'label': 'Enlace noroeste'},
+        'K': {'id': '64', 'code': None, 'label': None},
+        'LC': {'id': '65', 'code': None, 'label': 'Línea de la costa'},
+        'RC': {'id': '66', 'code': None, 'label': 'Ronda del centro'},
+        'CS': {'id': '68', 'code': 'RondaCS', 'label': 'Ronda CUR-SUR'},
+        'EI': {'id': '72', 'code': 'Enlace Irigoyen', 'label': 'Enlace Irigoyen'},
+        '110': {'id': '11', 'code': None, 'label': None},
     }
 
     @staticmethod
@@ -69,13 +72,14 @@ class ETR:
         if line[0].isdigit():
             line = re.sub('[^0-9]', '', line)
 
+        line = ETR.lines_ids[line]['code'] or line
+
         params = {
           'linea': line,
           'parada': stop
         }
 
         response = ETR.__query_server(ETR.url_sms, params)
-
         return response
 
     @staticmethod
@@ -83,7 +87,7 @@ class ETR:
         line = str(line)
 
         if line in ETR.lines_ids:
-            return ETR.lines_ids[line]
+            return ETR.lines_ids[line]['id']
 
     @staticmethod
     def __query_server(url, params=None):
@@ -158,14 +162,20 @@ class ETR:
     def list_lines():
         lines = []
         lines_list = ''
-        cont = 0
+        lines_cont = 0
 
-        for line in sorted(ETR.lines_ids):
-            lines_list += line + '\t'
-            lines += [line]
-            cont += 1
+        for line_key in sorted(ETR.lines_ids):
+            lines_cont += 1
 
-            if cont % 4 == 0:
+            lines_list += '{}{}{}'.format(
+                line_key,
+                ' - ' + ETR.lines_ids[line_key]['label'] if ETR.lines_ids[line_key]['label'] else '',
+                '\t'
+            )
+
+            lines += [line_key]
+
+            if lines_cont % 4 == 0:
                 lines_list += '\n'
 
         lines_list += '\n'
@@ -235,7 +245,7 @@ class ETR:
         print 'Consulta \'¿Cuándo llega?\' del ETR - Asistente de consulta interactiva.\n'
 
         lines_list, lines = ETR.list_lines()
-        print lines_list
+        print lines_list,
 
         line = raw_input("Línea: ")
 
@@ -319,25 +329,31 @@ class ETR:
             print '\nRecuperando las paradas para la línea ingresada. Espere, por favor...\n'
 
             str_stops = ETR.get_line_stops(line, int(streets[int(street)]['id']), int(intersections[int(intersection)]['id']))
+            stops_count = 0
 
             if str_stops:
                 elements = re.findall(r'<td[^>]*?>(.+)<\/td>', str_stops)
 
                 for index, element in enumerate(elements):
-                    print re.sub(r'<[^>]*?>', '', element),
+                    value = re.sub(r'<[^>]*?>', '', element)
+                    print value,
 
                     if (index + 1) % 2 == 0:
-                        print '\n'
+                        print '\n',
                     else:
+                        stops_count += 1
+                        stop_code = value
                         print '-',
 
-                if (index + 1) % 2 != 0:
-                    print '\n'
+                print '\n',
             else:
                 print 'No se encontraron paradas para la línea ingresada.'
                 sys.exit()
 
-        stop = raw_input("Parada: ")
+        if stops_count == 1:
+            stop = stop_code
+        else:
+            stop = raw_input('Parada: ')
 
         if not stop:
             print 'Debe seleccionar una parada para poder continuar.'
