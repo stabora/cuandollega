@@ -55,7 +55,7 @@ class ETR:
         '145': {'id': '52,53', 'code': None, 'label': None},
         '146': {'id': '54,55', 'code': None, 'label': None},
         '153': {'id': '56,57,58', 'code': None, 'label': None},
-        '35-9': {'id': '59,60,61', 'code': None, 'label': '35/9'},
+        '359': {'id': '59,60,61', 'code': None, 'label': '35/9'},
         'ENO': {'id': '63', 'code': None, 'label': 'Enlace noroeste'},
         'K': {'id': '64', 'code': None, 'label': None},
         'LC': {'id': '65', 'code': None, 'label': 'Línea de la costa'},
