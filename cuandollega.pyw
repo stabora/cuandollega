@@ -6,7 +6,7 @@ import getopt
 import time
 from lib.etr import ETR
 from lib.util import Util
-from ui.ui import App
+from ui.uigtk import CuandoLlegaApp
 
 
 ####################################
@@ -82,7 +82,7 @@ def main(args):
                 email = arg
 
         if not opts:
-            app = App(args)
+            app = CuandoLlegaApp()
             sys.exit(app.exec_())
 
         elif interactive:
@@ -95,29 +95,26 @@ def main(args):
             if custom_interval is not None:
                 interval = custom_interval
 
-            print 'Guadando registro de consultas en el directorio \'' + log_dir + '\' - Intervalo: ' + str(interval) + ' segundos.\n'
+            print 'Guardando registro de consultas en el directorio \'' + log_dir + '\' - Intervalo: ' + str(interval) + ' segundos.\n'
 
             while True:
-                response, incoming = ETR.check_line_schedule(line, stop)
+                response = ETR.check_line_schedule(line, stop)[1]
                 print response
 
-                if incoming:
-                    Util.send_notifications(line, response, alert, email)
+                Util.send_notifications(line, response, alert, email)
 
                 print '--- Espera: ' + str(interval) + ' segundos ---\n'
                 time.sleep(interval)
         else:
             response = None
-            incoming = False
 
             print 'Consultando el servicio \'¿Cuándo llega?\' del ETR. Espere, por favor...\n'
 
-            response, incoming = ETR.check_line_schedule(line, stop)
+            minutes_to_next, response = ETR.check_line_schedule(line, stop)
 
             print response
 
-            if incoming:
-                Util.send_notifications(line, response, alert, email)
+            Util.send_notifications(line, response, alert and minutes_to_next <= 10, email)
 
     except (getopt.GetoptError, UnboundLocalError):
         print usage_text

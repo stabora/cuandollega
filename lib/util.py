@@ -3,6 +3,7 @@
 
 import os
 import sys
+import base64
 import datetime
 import smtplib
 import json
@@ -31,10 +32,10 @@ class Util:
             if config.get('proxy', 'host'):
                 variables['proxy'] = config.get('proxy', 'host') + ':' + config.get('proxy', 'port')
                 proxy_user = config.get('proxy', 'user')
-                proxy_pass = config.get('proxy', 'pass')
+                proxy_pass = base64.b64decode(config.get('proxy', 'pass'))
 
                 if proxy_user or proxy_pass:
-                    variables['proxy'] = proxy_user + ':' + proxy_pass + '@' + variables['proxy']
+                    variables['proxy'] = 'http://' + proxy_user + ':' + proxy_pass + '@' + variables['proxy']
             else:
                 variables['proxy'] = None
 
@@ -71,8 +72,7 @@ class Util:
             else:
                 logfile = open(log_dir + '/' + file_name + '.log', 'a')
 
-            logfile.write(date_day + ' ' + date_hour + ' - ' + str(text))
-            logfile.write("\n")
+            logfile.write(date_day + ' ' + date_hour + '\n' + str(text) + '\n')
             logfile.close()
 
         except OSError, e:
@@ -84,11 +84,13 @@ class Util:
 
     @staticmethod
     def send_email(receiver, subject, text):
-        sender = ''
+        sender = receiver
         receivers = [receiver]
 
-        message = 'Subject: ' + subject + '\n'
-        message += text
+        message = 'Content-Type: text/plain; charset=utf-8\n'
+        message += 'Subject: =?UTF-8?B?{}?=\n'.format(base64.encodestring(subject.encode('utf-8')).strip())
+        message += 'To: ' + receiver + '\n\n'
+        message += text.encode('utf-8')
 
         try:
             smtpObj = smtplib.SMTP('proyectos3')
@@ -100,19 +102,10 @@ class Util:
     @staticmethod
     def send_notifications(line, response, alert=True, email=None):
         if alert:
-            '''
-            try:
-                from ui.ui import App
-                app = App(None)
-                app.main.trayIcon.showMessage(line, response.decode('utf-8'))
-                sys.exit(app.exec_())
-            except Exception:
-                os.system('kdialog --passivepopup \'' + response + '\' 10 --title \'Cuándo llega - Línea ' + line + ' EN CAMINO\' &')
-            '''
-            os.system('kdialog --passivepopup \'' + response + '\' 10 --title \'Cuándo llega - Línea ' + line + ' EN CAMINO\' &')
+            os.system('notify-send \'¿Cuándo llega? - Línea ' + line + '\' \'' + response.encode('utf-8') + '\' &')
 
         if email:
-            Util.send_email(email, '¿Cuándo llega? - Línea ' + line + ' EN CAMINO', response)
+            Util.send_email(email, u'¿Cuándo llega? - Línea ' + line + ' EN CAMINO', response)
 
     @staticmethod
     def generate_streets_list(str_streets):

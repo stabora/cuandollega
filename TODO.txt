@@ -1,1 +1,0 @@
-- Combo líneas: agregar etiqueta con descripción extendida en UI gráfica

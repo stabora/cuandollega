@@ -1,12 +1,11 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-import urllib
-import urllib2
+import requests
 import re
-import datetime
 import sys
 from lib.util import Util
+from bs4 import BeautifulSoup
 
 
 class ETR:
@@ -18,51 +17,47 @@ class ETR:
     timeout = config['timeout']
 
     lines_ids = {
-        '101': {'id': '1,2', 'code': None, 'label': None},
-        '102': {'id': '3,4', 'code': None, 'label': None},
-        '103': {'id': '5,6', 'code': None, 'label': None},
-        '106': {'id': '7,8', 'code': None, 'label': None},
-        '107': {'id': '9,10', 'code': None, 'label': None},
-        '110': {'id': '11', 'code': None, 'label': None},
-        '112': {'id': '12,13', 'code': None, 'label': None},
-        '113': {'id': '14', 'code': None, 'label': None},
-        '115': {'id': '15', 'code': None, 'label': None},
-        '116': {'id': '16', 'code': None, 'label': None},
-        '120': {'id': '17', 'code': None, 'label': None},
-        '121': {'id': '18', 'code': None, 'label': None},
-        '122': {'id': '19,20', 'code': None, 'label': None},
-        '123': {'id': '21', 'code': None, 'label': None},
-        '125': {'id': '22', 'code': None, 'label': None},
-        '126': {'id': '23,24', 'code': None, 'label': None},
-        '127': {'id': '25', 'code': None, 'label': None},
-        '128': {'id': '26,27', 'code': None, 'label': None},
-        '129': {'id': '28', 'code': None, 'label': None},
-        '130': {'id': '29', 'code': None, 'label': None},
-        '131': {'id': '30', 'code': None, 'label': None},
-        '132': {'id': '31', 'code': None, 'label': None},
-        '133': {'id': '32,33', 'code': None, 'label': None},
-        '134': {'id': '34', 'code': None, 'label': None},
-        '135': {'id': '35', 'code': None, 'label': None},
-        '136': {'id': '36', 'code': None, 'label': None},
-        '137': {'id': '37', 'code': None, 'label': None},
-        '138': {'id': '38,39', 'code': None, 'label': None},
-        '139': {'id': '40,41', 'code': None, 'label': None},
-        '140': {'id': '43', 'code': None, 'label': None},
-        '141': {'id': '44', 'code': None, 'label': None},
-        '142': {'id': '45,46,47', 'code': None, 'label': None},
-        '143': {'id': '48,49', 'code': None, 'label': None},
-        '144': {'id': '50,51', 'code': None, 'label': None},
-        '145': {'id': '52,53', 'code': None, 'label': None},
-        '146': {'id': '54,55', 'code': None, 'label': None},
-        '153': {'id': '56,57,58', 'code': None, 'label': None},
-        '359': {'id': '59,60,61', 'code': None, 'label': '35/9'},
-        'ENO': {'id': '63', 'code': None, 'label': 'Enlace noroeste'},
-        'K': {'id': '64', 'code': None, 'label': None},
-        'LC': {'id': '65', 'code': None, 'label': 'Línea de la costa'},
-        'RC': {'id': '66', 'code': None, 'label': 'Ronda del centro'},
-        'CS': {'id': '68', 'code': 'RondaCS', 'label': 'Ronda CUR-SUR'},
-        'EI': {'id': '72', 'code': 'Enlace Irigoyen', 'label': 'Enlace Irigoyen'},
-        '110': {'id': '11', 'code': None, 'label': None},
+        '101': {'id': '1130', 'label': None},
+        '102': {'id': '1141', 'label': None},
+        '103': {'id': '1142', 'label': None},
+        '106': {'id': '1143', 'label': None},
+        '107': {'id': '1144', 'label': None},
+        '110': {'id': '1145', 'label': None},
+        '112': {'id': '1131', 'label': None},
+        '113': {'id': '1120', 'label': None},
+        '115': {'id': '1132', 'label': None},
+        '116': {'id': '1122', 'label': None},
+        '120': {'id': '1032', 'label': None},
+        '121': {'id': '1121', 'label': None},
+        '122': {'id': '1123', 'label': None},
+        '123': {'id': '1124', 'label': None},
+        '125': {'id': '1146', 'label': None},
+        '126': {'id': '1133', 'label': None},
+        '127': {'id': '1134', 'label': None},
+        '128': {'id': '1147', 'label': None},
+        '129': {'id': '1148', 'label': None},
+        '130': {'id': '1149', 'label': None},
+        '131': {'id': '1135', 'label': None},
+        '132': {'id': '1136', 'label': None},
+        '133': {'id': '1125', 'label': None},
+        '134': {'id': '1128', 'label': None},
+        '135': {'id': '1166', 'label': None},
+        '136': {'id': '1129', 'label': None},
+        '137': {'id': '1167', 'label': None},
+        '138': {'id': '1137', 'label': None},
+        '139': {'id': '1138', 'label': None},
+        '140': {'id': '1139', 'label': None},
+        '141': {'id': '1140', 'label': None},
+        '142': {'id': '1150', 'label': None},
+        '143': {'id': '1151', 'label': None},
+        '144': {'id': '1152', 'label': None},
+        '145': {'id': '1153', 'label': None},
+        '146': {'id': '1154', 'label': None},
+        '153': {'id': '1126', 'label': None},
+        'K': {'id': '1164', 'label': None},
+        'LC': {'id': '1156', 'label': 'Línea de la costa'},
+        'RC': {'id': '1155', 'label': 'Ronda del centro'},
+        'CS': {'id': '1163', 'label': 'Ronda CUR-SUR'}
     }
 
     @staticmethod
@@ -72,11 +67,12 @@ class ETR:
         if line[0].isdigit():
             line = re.sub('[^0-9]', '', line)
 
-        line = ETR.lines_ids[line]['code'] or line
+        line = ETR.lines_ids[line]['id']
 
         params = {
           'linea': line,
-          'parada': stop
+          'parada': stop,
+          'accion': 'getSmsEfisat'
         }
 
         response = ETR.__query_server(ETR.url_sms, params)
@@ -92,18 +88,17 @@ class ETR:
     @staticmethod
     def __query_server(url, params=None):
         try:
-            url_params = urllib.urlencode(params) if params else None
+            response = requests.post(
+                url,
+                timeout=ETR.timeout,
+                data=params if params else None,
+                proxies={
+                    'http': ETR.proxy,
+                    'https': ETR.proxy,
+                } if ETR.proxy else None
+            )
 
-            if ETR.proxy:
-                proxy_handler = urllib2.ProxyHandler({'http': ETR.proxy})
-                opener = urllib2.build_opener(proxy_handler)
-                urllib2.install_opener(opener)
-
-            ws = urllib2.urlopen(url, url_params, timeout=ETR.timeout)
-            response = ws.read()
-            ws.close()
-
-            return response
+            return response.text
 
         except Exception, e:
             if hasattr(e, 'reason'):
@@ -121,42 +116,33 @@ class ETR:
     @staticmethod
     def __parse_response(line, stop, text):
         response = ''
-        incoming = False
+        index = 0
+        minutes_to_next = None
+        headers = ()
+        parser = BeautifulSoup(text)
 
-        pattern_incoming = re.compile(r'(.+)?Linea\s(.+):\s([0-9]+)min.?\.?\s([0-9]+)mts.?\.?')
-        pattern_idle = re.compile(r'(.+)?Linea\s(.+):\sProx.(.+)([0-9]{2}:[0-9]{2})hs\sllega\s([0-9]+)min\.')
+        for header in parser.find_all('th'):
+            headers += header.get_text().strip(),
 
-        if text:
-            results = text.split(' - ')
+        for cell in parser.find_all('td'):
+            index += 1
 
-        response = '--- Consulta realizada a las ' + datetime.datetime.now().strftime("%H:%M") + ' ---\n\n'
+            response += headers[index - 1] + ': '
+            response += cell.get_text().strip()
 
-        for result in results:
-            if result:
-                match_incoming = pattern_incoming.match(result)
-                match_idle = pattern_idle.match(result)
+            if index == 2 and not minutes_to_next:
+                response += ' - '
+                try:
+                    minutes_to_next = int(cell.get_text().strip().split(' ')[0])
+                except:
+                    minutes_to_next = 0
+            elif index == 3:
+                response += '\n'
+                index = 0
+            else:
+                response += ' - '
 
-                if match_incoming:
-                    if line in match_incoming.group(2):
-                        response += 'Línea: ' + match_incoming.group(2) + '\n'
-                        response += 'Parada: ' + str(stop) + '\n'
-                        response += 'Estado: EN CAMINO\n'
-                        response += 'Tiempo de llegada: ' + match_incoming.group(3) + ' minutos\n'
-                        response += 'Distancia: ' + match_incoming.group(4) + 'mts.\n\n'
-
-                        incoming = True
-                elif match_idle:
-                    if line in match_idle.group(2):
-                        response += 'Línea: ' + match_idle.group(2) + '\n'
-                        response += 'Parada: ' + str(stop) + '\n'
-                        response += 'Estado: EN ESPERA\n'
-                        response += 'Hora de salida: ' + match_idle.group(4) + '\n\n'
-                else:
-                    response += 'Línea: ' + line + '\n'
-                    response += 'Parada: ' + str(stop) + '\n'
-                    response += 'Respuesta no procesada: ' + result + '\n\n'
-
-        return response, incoming
+        return minutes_to_next, response
 
     @staticmethod
     def list_lines():
@@ -178,23 +164,23 @@ class ETR:
             if lines_cont % 4 == 0:
                 lines_list += '\n'
 
-        lines_list += '\n'
+        lines_list += '\n\n'
 
         return lines_list, lines
 
     @staticmethod
     def get_line_streets(line):
         response = None
-
         line_id = ETR.__get_line_id(line)
 
         if line_id:
             params = {
+                'line': line,
                 'accion': 'getCalle',
                 'idLinea': line_id
             }
 
-            response = ETR.__query_server(ETR.url_data + '?' + urllib.urlencode(params))
+            response = ETR.__query_server(ETR.url_data, params)
 
         return response
 
@@ -205,40 +191,67 @@ class ETR:
 
         if line_id:
             params = {
+                'line': line,
                 'accion': 'getInterseccion',
                 'idLinea': line_id,
                 'idCalle': street
             }
 
-            response = ETR.__query_server(ETR.url_data + '?' + urllib.urlencode(params))
+            response = ETR.__query_server(ETR.url_data, params)
 
         return response
 
     @staticmethod
     def get_line_stops(line, street, intersection):
-        response = None
-
         line_id = ETR.__get_line_id(line)
+        stops = []
+        last_stop_id = None
 
         if line_id:
             params = {
-                'accion': 'getInfoParadas',
+                'line': line,
+                'accion': 'getParadasXCalles',
                 'idLinea': line_id,
                 'idCalle': street,
                 'idInt': intersection
             }
 
-            response = ETR.__query_server(ETR.url_data + '?' + urllib.urlencode(params))
+            str_stops = ETR.__query_server(ETR.url_data, params)
 
-        return response
+            if str_stops:
+                parser = BeautifulSoup(str_stops)
+
+                for row in parser.find_all('tr'):
+                    cells = row.find_all('td')
+
+                    if cells:
+                        try:
+                            cell_stop_id = int(cells[0].get_text().strip())
+                        except:
+                            cell_stop_id = None
+
+                        try:
+                            cell_stop_description = cells[1].get_text().strip()
+                        except:
+                            cell_stop_description = None
+
+                        if cell_stop_id and cell_stop_id not in [stop['id'] for stop in stops]:
+                            last_stop_id = cell_stop_id
+                            stops.append({'id': cell_stop_id, 'desc': cell_stop_description})
+                        elif cell_stop_description:
+                            for stop in stops:
+                                if stop['id'] == last_stop_id:
+                                    stop['desc'] = ', '.join([stop['desc'], cell_stop_description])
+
+        return stops
 
     @staticmethod
     def check_line_schedule(line, stop):
         response = ETR.__query_sms(line, stop)
+        minutes_to_next, response = ETR.__parse_response(line, stop, response)
         Util.write_log_file(line, stop, response)
-        response, incoming = ETR.__parse_response(line, stop, response)
 
-        return response, incoming
+        return minutes_to_next, response
 
     @staticmethod
     def interactive_mode_wizard():
@@ -328,30 +341,19 @@ class ETR:
 
             print '\nRecuperando las paradas para la línea ingresada. Espere, por favor...\n'
 
-            str_stops = ETR.get_line_stops(line, int(streets[int(street)]['id']), int(intersections[int(intersection)]['id']))
-            stops_count = 0
+            stops = ETR.get_line_stops(line, int(streets[int(street)]['id']), int(intersections[int(intersection)]['id']))
 
-            if str_stops:
-                elements = re.findall(r'<td[^>]*?>(.+)<\/td>', str_stops)
+            if stops:
+                for stop in stops:
+                    print '{} - {}'.format(stop['id'], stop['desc'])
 
-                for index, element in enumerate(elements):
-                    value = re.sub(r'<[^>]*?>', '', element)
-                    print value,
-
-                    if (index + 1) % 2 == 0:
-                        print '\n',
-                    else:
-                        stops_count += 1
-                        stop_code = value
-                        print '-',
-
-                print '\n',
+                print
             else:
                 print 'No se encontraron paradas para la línea ingresada.'
                 sys.exit()
 
-        if stops_count == 1:
-            stop = stop_code
+        if len(stops) == 1:
+            stop = stops[0]['id']
         else:
             stop = raw_input('Parada: ')
 
